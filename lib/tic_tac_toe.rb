@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# TODO refactor TicTacToe and add more tests
+# consider implementing menu
+
 def put_blank_line
   puts
 end
