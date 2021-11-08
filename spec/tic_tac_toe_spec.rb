@@ -3,8 +3,96 @@
 require_relative '../lib/tic_tac_toe'
 require 'stringio'
 
+RSpec.describe "#put_blank_line" do
+  it "prints a blank line" do
+    expect { put_blank_line }.to output("\n").to_stdout
+  end
+end
+
 RSpec.describe TicTacToe do
   pending "acceptance test"
+end
+
+RSpec.describe Validatable do
+
+  describe "#input_int" do
+    let(:dummy_class) { Class.new { extend Validatable } }
+    let(:input) { StringIO.new }
+    DEFAULT_NUMBER = 3
+    before { $stdin = input }
+    before { input.string = "#{DEFAULT_NUMBER}\n" }
+
+    it "prints the message given" do
+      message = "Enter integer: "
+      expect { dummy_class.input_int(message) }.to output(message).to_stdout
+    end
+
+    shared_examples_for "accepting integer" do |number|
+      before { input.string = "#{number}\n" }
+
+      it "does not print error" do
+        expect { dummy_class.input_int("") }.to_not output(
+          "Invalid input: please enter an integer number."
+        ).to_stdout
+      end
+
+      it "returns the integer" do
+        expect(dummy_class.input_int("")).to eq(number.to_i);
+      end
+    end
+
+    shared_examples_for "invalid input" do |input_value|
+      REPEAT_BAD_INPUT_TIMES = 3
+      ERROR_MESSAGE = "Invalid input: please enter an integer number.\n\n"
+      before do
+        input.string = "#{"#{input_value}\n" * REPEAT_BAD_INPUT_TIMES}" \
+          "#{DEFAULT_NUMBER}\n"
+      end
+
+      it "prints error" do
+        expect { dummy_class.input_int("") }.to output(
+          /#{ERROR_MESSAGE}/
+        ).to_stdout
+      end
+
+      it "reprompts for input until it receives a correct one" do
+        expect { dummy_class.input_int("") }.to output(
+          ERROR_MESSAGE * REPEAT_BAD_INPUT_TIMES
+        ).to_stdout
+      end
+
+      it "returns the last input" do
+        expect(dummy_class.input_int("")).to eq(DEFAULT_NUMBER)
+      end
+    end
+
+    describe "given" do
+      describe "positive integer" do
+        it_behaves_like 'accepting integer', DEFAULT_NUMBER
+      end
+
+      describe "zero" do
+        it_behaves_like 'accepting integer', 0
+      end
+
+      describe "negative integers" do
+        it_behaves_like 'accepting integer', -120
+      end
+
+      describe "empty input" do
+        it_behaves_like 'invalid input', ""
+      end
+
+      describe "other characters with leading digits" do
+        it_behaves_like 'accepting integer', "123asdf"
+      end
+
+      describe "accept other characters without leading digits" do
+        it_behaves_like 'invalid input', "edf"
+      end
+    end
+
+  end
 end
 
 RSpec.describe Player do
