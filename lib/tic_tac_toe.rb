@@ -37,39 +37,38 @@ class TicTacToe
 
   public
 
-  def start_game
+  def play_game
     turn = 0
-    puts @board.current_layout
+    print_current_board
+
     while !@board.game_over?
       turn += 1
       current_player = turn % 2 != 0 ? @player1 : @player2
 
-      valid_move = nil
-      until valid_move
-        put_blank_line
-        valid_move = validate_move(current_player.move, @board.board)
-      end
-
-      @board.place(current_player.piece, valid_move)
+      take_turn(current_player)
 
       put_blank_line
-      puts @board.current_layout
-
+      print_current_board
     end
 
     put_blank_line
-
-    if @board.winner
-      puts "#{@board.winner} wins!"
-    else
-      puts "Draw"
-    end
+    print_winner_info
   end
 
   private
 
+  def take_turn(player)
+    valid_move = nil
+    until valid_move
+      put_blank_line
+      valid_move = validate_move(player.move, @board.board)
+    end
+
+    @board.place(player.piece, valid_move)
+  end
+
   def validate_move(to_position, board)
-    if to_position < 0 || to_position > 8
+    if to_position < 0 || to_position >= board.length
       puts "Not a valid square!"
       false
     elsif board[to_position] != Board::EMPTY
@@ -78,6 +77,18 @@ class TicTacToe
     else
       to_position
     end
+  end
+
+  def print_winner_info
+    if @board.winner
+      puts "#{@board.winner} wins!"
+    else
+      puts "Draw"
+    end
+  end
+
+  def print_current_board
+    puts @board.current_layout
   end
 end
 
@@ -167,5 +178,5 @@ class Board
 end
 
 if __FILE__ == $PROGRAM_NAME
-  TicTacToe.new.start_game
+  TicTacToe.new.play_game
 end
