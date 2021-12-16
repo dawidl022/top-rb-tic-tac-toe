@@ -14,6 +14,8 @@ RSpec.describe TicTacToe do
 end
 
 RSpec.describe Validatable do
+  REPEAT_BAD_INPUT_TIMES = 3
+  ERROR_MESSAGE = "Invalid input: please enter an integer number.\n\n"
 
   describe "#input_int" do
     let(:dummy_class) { Class.new { extend Validatable } }
@@ -42,8 +44,6 @@ RSpec.describe Validatable do
     end
 
     shared_examples_for "invalid input" do |input_value|
-      REPEAT_BAD_INPUT_TIMES = 3
-      ERROR_MESSAGE = "Invalid input: please enter an integer number.\n\n"
       before do
         input.string = "#{"#{input_value}\n" * REPEAT_BAD_INPUT_TIMES}" \
           "#{DEFAULT_NUMBER}\n"
@@ -62,6 +62,7 @@ RSpec.describe Validatable do
       end
 
       it "returns the last input" do
+        allow(dummy_class).to receive(:puts)
         expect(dummy_class.input_int("")).to eq(DEFAULT_NUMBER)
       end
     end
@@ -229,11 +230,11 @@ RSpec.describe Board do
 
   describe "#game_over?" do
     def is_game_over
-      expect(board.game_over?).to be true
+      expect(board).to be_game_over
     end
 
     def is_not_game_over
-      expect(board.game_over?).to be false
+      expect(board).to_not be_game_over
     end
 
     it 'starts out as false' do
