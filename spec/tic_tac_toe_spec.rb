@@ -10,7 +10,155 @@ RSpec.describe "#put_blank_line" do
 end
 
 RSpec.describe TicTacToe do
-  pending "acceptance test"
+  # Integration test: depends on Board but not Player
+  subject(:game) { described_class.new }
+  let(:player1) { instance_double(Player) }
+  let(:player2) { instance_double(Player) }
+
+  context "when player 1 is supposed to win" do
+    before do
+      allow(player1).to receive(:move).and_return(0, 2, 4, 6, 8)
+      allow(player1).to receive(:piece).and_return(:X)
+      allow(player2).to receive(:move).and_return(1, 3, 5, 7)
+      allow(player2).to receive(:piece).and_return(:O)
+      game.instance_variable_set(:@player1, player1)
+      game.instance_variable_set(:@player2, player2)
+    end
+
+    it "prints that X wins" do
+      expect(game).to receive(:puts).with("X wins!")
+      allow(game).to receive(:print_current_board)
+      allow(game).to receive(:put_blank_line)
+      game.play_game
+    end
+
+    it "prints an empty board at the start" do
+      expect(game).to receive(:puts).with(
+        "   |   |   \n" \
+        "---|---|---\n" \
+        "   |   |   \n" \
+        "---|---|---\n" \
+        "   |   |   \n" \
+      )
+      expect(game).to receive(:puts).at_least(:once)
+      game.play_game
+    end
+
+    it "prints the board after 1 turn" do
+      expect(game).to receive(:puts).with(
+        " X |   |   \n" \
+        "---|---|---\n" \
+        "   |   |   \n" \
+        "---|---|---\n" \
+        "   |   |   \n" \
+      )
+      expect(game).to receive(:puts).at_least(:once)
+      game.play_game
+    end
+
+    it "prints the final game board" do
+      expect(game).to receive(:puts).with(
+        " X | O | X \n" \
+        "---|---|---\n" \
+        " O | X | O \n" \
+        "---|---|---\n" \
+        " X |   |   \n" \
+      )
+      expect(game).to receive(:puts).at_least(:once)
+      game.play_game
+    end
+  end
+
+  context "when the game ends in a draw" do
+    before do
+      allow(player1).to receive(:move).and_return(1, 2, 3, 4, 8)
+      allow(player1).to receive(:piece).and_return(:X)
+      allow(player2).to receive(:move).and_return(0, 5, 6, 7)
+      allow(player2).to receive(:piece).and_return(:O)
+      game.instance_variable_set(:@player1, player1)
+      game.instance_variable_set(:@player2, player2)
+    end
+
+    it "prints that the game is a draw" do
+      expect(game).to receive(:puts).with("Draw")
+      allow(game).to receive(:print_current_board)
+      allow(game).to receive(:put_blank_line)
+      game.play_game
+    end
+
+    it "prints the final game board" do
+      expect(game).to receive(:puts).with(
+        " O | X | X \n" \
+        "---|---|---\n" \
+        " X | X | O \n" \
+        "---|---|---\n" \
+        " O | O | X \n" \
+      )
+      expect(game).to receive(:puts).at_least(:once)
+      game.play_game
+    end
+  end
+
+  context "when invalid input is entered" do
+
+    context "when it is an invalid index" do
+      before do
+        allow(player1).to receive(:move).and_return(10, -2, 0, 1, 2)
+        allow(player1).to receive(:piece).and_return(:X)
+        allow(player2).to receive(:move).and_return(6, 7, 8)
+        allow(player2).to receive(:piece).and_return(:O)
+        game.instance_variable_set(:@player1, player1)
+        game.instance_variable_set(:@player2, player2)
+      end
+
+      it "prints an error message" do
+        expect(game).to receive(:puts).with("Not a valid square!")
+        expect(game).to receive(:puts).at_least(:once)
+        game.play_game
+      end
+
+      it "takes input again" do
+        expect(game).to receive(:puts).with(
+          " X | X | X \n" \
+          "---|---|---\n" \
+          "   |   |   \n" \
+          "---|---|---\n" \
+          " O | O |   \n" \
+        )
+        expect(game).to receive(:puts).at_least(:once)
+        game.play_game
+      end
+    end
+
+    context "when it is a taken square" do
+      before do
+        allow(player1).to receive(:move).and_return(0, 1, 2)
+        allow(player1).to receive(:piece).and_return(:X)
+        allow(player2).to receive(:move).and_return(0, 6, 7, 8)
+        allow(player2).to receive(:piece).and_return(:O)
+        game.instance_variable_set(:@player1, player1)
+        game.instance_variable_set(:@player2, player2)
+      end
+
+      it "prints an error message" do
+        expect(game).to receive(:puts).with("That square is already taken!")
+        expect(game).to receive(:puts).at_least(:once)
+        game.play_game
+      end
+
+      it "takes input again" do
+        expect(game).to receive(:puts).with(
+          " X | X | X \n" \
+          "---|---|---\n" \
+          "   |   |   \n" \
+          "---|---|---\n" \
+          " O | O |   \n" \
+        )
+        expect(game).to receive(:puts).at_least(:once)
+        game.play_game
+      end
+    end
+  end
 end
 
 RSpec.describe Validatable do
